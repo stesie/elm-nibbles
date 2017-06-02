@@ -54,7 +54,7 @@ type Msg = RandomizeGame (Point, Point) | Tick Time.Time | KeyDown Keyboard.KeyC
 update :  Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
   RandomizeGame (snake, food) -> ({ model | snake = [snake], food = Just food }, Cmd.none)
-  Tick _-> ({ model | snake = tickSnake model}, Cmd.none)
+  Tick _-> tickSnake model
   KeyDown keyCode -> case (keyCodeToDirection keyCode) of
     Just dir -> ({ model | direction = dir }, Cmd.none)
     Nothing -> (model, Cmd.none)
@@ -67,7 +67,7 @@ keyCodeToDirection x = case x of
   40 -> Just South
   _ -> Nothing
 
-tickSnake : Model -> List Point
+tickSnake : Model -> (Model, Cmd Msg)
 tickSnake model =
   let
     offset = case model.direction of
@@ -75,10 +75,11 @@ tickSnake model =
       South -> (0, 1)
       North -> (0, -1)
       West -> (-1, 0)
-  in
-    case (List.head model.snake) of
+    tickedSnake = case (List.head model.snake) of
       Nothing -> model.snake
       Just point -> (addPoints point offset) :: model.snake |> List.take model.snakeLength
+  in
+    ({ model | snake = tickedSnake }, Cmd.none)
 
 addPoints : Point -> Point -> Point
 addPoints (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
