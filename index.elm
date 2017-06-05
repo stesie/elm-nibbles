@@ -4,6 +4,7 @@ import Collage
 import Color
 import Element
 import Html exposing (..)
+import Html.Events exposing (onClick)
 import Keyboard
 import Random
 import Time
@@ -68,12 +69,13 @@ type alias Model =
     , snakeLength : Int
     , food : Maybe Point
     , direction : Direction
+    , alive : Bool
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model [] 1 Nothing North
+    ( Model [] 1 Nothing North True
     , Cmd.batch
         [ Random.generate NewFood randomPoint
         , Random.generate NewSnake randomPoint
@@ -95,11 +97,15 @@ type Msg
     | NewSnake Point
     | Tick Time.Time
     | KeyDown Keyboard.KeyCode
+    | RestartGame
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        RestartGame ->
+            init
+
         NewFood food ->
             ( { model | food = Just food }, Cmd.none )
 
@@ -159,6 +165,9 @@ tickSnake model =
                         Just food ->
                             newHead == food
 
+                collidesItself =
+                    List.member newHead model.snake
+
                 newSnakeLen =
                     if collidesFood then
                         model.snakeLength + 1
@@ -168,7 +177,9 @@ tickSnake model =
                 tickedSnake =
                     newHead :: model.snake |> List.take newSnakeLen
             in
-                if collidesFood then
+                if collidesItself then
+                    ( { model | alive = False }, Cmd.none )
+                else if collidesFood then
                     ( { model | snake = tickedSnake, snakeLength = newSnakeLen, food = Nothing }
                     , Random.generate NewFood randomPoint
                     )
@@ -221,10 +232,14 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ renderSnake model.snake
-            ++ renderFood model.food
-            |> Collage.collage canvasWidth canvasHeight
-            |> Element.toHtml
+        [ if model.alive then
+            renderSnake model.snake
+                ++ renderFood model.food
+                |> Collage.collage canvasWidth canvasHeight
+                |> Element.toHtml
+          else
+            h2 [] [ text "Ouuch!" ]
+        , button [ onClick RestartGame ] [ text "Start over" ]
         ]
 
 
