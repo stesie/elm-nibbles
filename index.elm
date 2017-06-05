@@ -67,7 +67,12 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model [] 3 Nothing North, randomizeGame )
+    ( Model [] 3 Nothing North
+    , Cmd.batch
+        [ Random.generate NewFood randomPoint
+        , Random.generate NewSnake randomPoint
+        ]
+    )
 
 
 randomPoint : Random.Generator ( Int, Int )
@@ -75,17 +80,13 @@ randomPoint =
     Random.pair (Random.int 0 boardWidth) (Random.int 0 boardHeight)
 
 
-randomizeGame : Cmd Msg
-randomizeGame =
-    Random.generate RandomizeGame (Random.pair randomPoint randomPoint)
-
-
 
 -- UPDATE
 
 
 type Msg
-    = RandomizeGame ( Point, Point )
+    = NewFood Point
+    | NewSnake Point
     | Tick Time.Time
     | KeyDown Keyboard.KeyCode
 
@@ -93,8 +94,11 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        RandomizeGame ( snake, food ) ->
-            ( { model | snake = [ snake ], food = Just food }, Cmd.none )
+        NewFood food ->
+            ( { model | food = Just food }, Cmd.none )
+
+        NewSnake snake ->
+            ( { model | snake = [ snake ] }, Cmd.none )
 
         Tick _ ->
             tickSnake model
