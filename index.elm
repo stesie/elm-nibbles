@@ -73,7 +73,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model [] 3 Nothing North
+    ( Model [] 1 Nothing North
     , Cmd.batch
         [ Random.generate NewFood randomPoint
         , Random.generate NewSnake randomPoint
@@ -159,11 +159,19 @@ tickSnake model =
                         Just food ->
                             newHead == food
 
+                newSnakeLen =
+                    if collidesFood then
+                        model.snakeLength + 1
+                    else
+                        model.snakeLength
+
                 tickedSnake =
-                    newHead :: model.snake |> List.take model.snakeLength
+                    newHead :: model.snake |> List.take newSnakeLen
             in
                 if collidesFood then
-                    ( { model | snake = tickedSnake, food = Nothing }, Random.generate NewFood randomPoint )
+                    ( { model | snake = tickedSnake, snakeLength = newSnakeLen, food = Nothing }
+                    , Random.generate NewFood randomPoint
+                    )
                 else
                     ( { model | snake = tickedSnake }, Cmd.none )
 
