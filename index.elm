@@ -83,7 +83,7 @@ init =
 
 randomPoint : Random.Generator ( Int, Int )
 randomPoint =
-    Random.pair (Random.int 0 boardWidth) (Random.int 0 boardHeight)
+    Random.pair (Random.int 0 <| boardWidth - 1) (Random.int 0 <| boardHeight - 1)
 
 
 
@@ -149,7 +149,7 @@ tickSnake model =
                     relativePointForDirection model.direction
 
                 newHead =
-                    addPoints head offset
+                    addPoints head offset |> clipPoint boardWidth boardHeight
 
                 collidesFood =
                     case model.food of
@@ -195,6 +195,11 @@ relativePointForDirection direction =
 addPoints : Point -> Point -> Point
 addPoints ( x1, y1 ) ( x2, y2 ) =
     ( x1 + x2, y1 + y2 )
+
+
+clipPoint : Int -> Int -> Point -> Point
+clipPoint width height ( x, y ) =
+    ( x % width, y % height )
 
 
 
