@@ -139,19 +139,33 @@ keyCodeToDirection x =
 
 tickSnake : Model -> ( Model, Cmd Msg )
 tickSnake model =
-    let
-        offset =
-            relativePointForDirection model.direction
+    case (List.head model.snake) of
+        Nothing ->
+            ( model, Cmd.none )
 
-        tickedSnake =
-            case (List.head model.snake) of
-                Nothing ->
-                    model.snake
+        Just head ->
+            let
+                offset =
+                    relativePointForDirection model.direction
 
-                Just point ->
-                    (addPoints point offset) :: model.snake |> List.take model.snakeLength
-    in
-        ( { model | snake = tickedSnake }, Cmd.none )
+                newHead =
+                    addPoints head offset
+
+                collidesFood =
+                    case model.food of
+                        Nothing ->
+                            False
+
+                        Just food ->
+                            newHead == food
+
+                tickedSnake =
+                    newHead :: model.snake |> List.take model.snakeLength
+            in
+                if collidesFood then
+                    ( { model | snake = tickedSnake, food = Nothing }, Random.generate NewFood randomPoint )
+                else
+                    ( { model | snake = tickedSnake }, Cmd.none )
 
 
 relativePointForDirection : Direction -> Point
