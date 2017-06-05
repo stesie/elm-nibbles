@@ -141,18 +141,7 @@ tickSnake : Model -> ( Model, Cmd Msg )
 tickSnake model =
     let
         offset =
-            case model.direction of
-                East ->
-                    ( 1, 0 )
-
-                South ->
-                    ( 0, 1 )
-
-                North ->
-                    ( 0, -1 )
-
-                West ->
-                    ( -1, 0 )
+            relativePointForDirection model.direction
 
         tickedSnake =
             case (List.head model.snake) of
@@ -163,6 +152,22 @@ tickSnake model =
                     (addPoints point offset) :: model.snake |> List.take model.snakeLength
     in
         ( { model | snake = tickedSnake }, Cmd.none )
+
+
+relativePointForDirection : Direction -> Point
+relativePointForDirection direction =
+    case direction of
+        East ->
+            ( 1, 0 )
+
+        South ->
+            ( 0, 1 )
+
+        North ->
+            ( 0, -1 )
+
+        West ->
+            ( -1, 0 )
 
 
 addPoints : Point -> Point -> Point
