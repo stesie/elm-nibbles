@@ -9,6 +9,7 @@ import Random
 import Time
 
 
+main : Program Never Model Msg
 main =
     Html.program
         { init = init
@@ -22,22 +23,27 @@ main =
 -- constants
 
 
+boardWidth : number
 boardWidth =
     20
 
 
+boardHeight : number
 boardHeight =
     15
 
 
+dotDiameter : number
 dotDiameter =
     20
 
 
+canvasWidth : number
 canvasWidth =
     boardWidth * dotDiameter
 
 
+canvasHeight : number
 canvasHeight =
     boardHeight * dotDiameter
 
