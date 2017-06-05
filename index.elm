@@ -167,24 +167,19 @@ tickSnake model =
 
                 collidesItself =
                     List.member newHead model.snake
-
-                newSnakeLen =
-                    if collidesFood then
-                        model.snakeLength + 1
-                    else
-                        model.snakeLength
-
-                tickedSnake =
-                    newHead :: model.snake |> List.take newSnakeLen
             in
                 if collidesItself then
                     ( { model | alive = False }, Cmd.none )
                 else if collidesFood then
-                    ( { model | snake = tickedSnake, snakeLength = newSnakeLen, food = Nothing }
+                    ( { model
+                        | snake = newHead :: model.snake |> List.take (model.snakeLength + 1)
+                        , snakeLength = model.snakeLength + 1
+                        , food = Nothing
+                      }
                     , Random.generate NewFood randomPoint
                     )
                 else
-                    ( { model | snake = tickedSnake }, Cmd.none )
+                    ( { model | snake = newHead :: model.snake |> List.take model.snakeLength }, Cmd.none )
 
 
 relativePointForDirection : Direction -> Point
